@@ -3,7 +3,7 @@ import pytest
 from match_variant import Variant
 
 
-class TestVariant(Variant):
+class SampleVariant(Variant):
     option0: ()  # type: ignore
     option1: (str,)  # type: ignore
     option2: (str, int)  # type: ignore
@@ -12,7 +12,7 @@ class TestVariant(Variant):
 
 def test_too_many_args():
     with pytest.raises(TypeError) as ex:
-        b = TestVariant.option1("Too", "many", "args")
+        b = SampleVariant.option1("Too", "many", "args")
 
     ex_str = str(ex.value)
     assert "1" in ex_str
@@ -20,34 +20,34 @@ def test_too_many_args():
 
 
 def test_adt():
-    assert TestVariant.option1.__qualname__ == "TestVariant.option1"
+    assert SampleVariant.option1.__qualname__ == "SampleVariant.option1"
 
 
 def test_match_args():
-    assert TestVariant.option0().__match_args__ == ()
-    assert TestVariant.option1("one").__match_args__ == ("_0",)
-    assert TestVariant.option2("one", 2).__match_args__ == ("_0", "_1")
+    assert SampleVariant.option0().__match_args__ == ()
+    assert SampleVariant.option1("one").__match_args__ == ("_0",)
+    assert SampleVariant.option2("one", 2).__match_args__ == ("_0", "_1")
 
 
 def test_match_no_args():
-    match TestVariant.option0():
-        case TestVariant.option0():
+    match SampleVariant.option0():
+        case SampleVariant.option0():
             pass
         case _:
             pytest.fail("Should be option0")
 
 
 def test_match_one_arg():
-    match TestVariant.option1("boo"):
-        case TestVariant.option1(val):
+    match SampleVariant.option1("boo"):
+        case SampleVariant.option1(val):
             assert val == "boo"
         case _:
             pytest.fail("Should be option1")
 
 
 def test_match_two_args():
-    match TestVariant.option2("boo", 2):
-        case TestVariant.option2(val, val2):
+    match SampleVariant.option2("boo", 2):
+        case SampleVariant.option2(val, val2):
             assert val == "boo"
             assert val2 == 2
         case _:
@@ -55,46 +55,46 @@ def test_match_two_args():
 
 
 def test_repr():
-    o = TestVariant.option0()
-    assert repr(o) == "TestVariant.option0()"
-    o = TestVariant.option1("one")
-    assert repr(o) == "TestVariant.option1('one')"
-    o = TestVariant.option2("one", 2)
-    assert repr(o) == "TestVariant.option2('one', 2)"
+    o = SampleVariant.option0()
+    assert repr(o) == "SampleVariant.option0()"
+    o = SampleVariant.option1("one")
+    assert repr(o) == "SampleVariant.option1('one')"
+    o = SampleVariant.option2("one", 2)
+    assert repr(o) == "SampleVariant.option2('one', 2)"
 
 
 @pytest.mark.parametrize(
     ["self", "other", "expected"],
     [
         pytest.param(
-            TestVariant.option_list([]),
-            TestVariant.option_list([]),
+            SampleVariant.option_list([]),
+            SampleVariant.option_list([]),
             True,
             id="equal options",
         ),
         pytest.param(
-            TestVariant.option0(), TestVariant.option0(), True, id="equal option0"
+            SampleVariant.option0(), SampleVariant.option0(), True, id="equal option0"
         ),
         pytest.param(
-            TestVariant.option_list([]),
-            TestVariant.option_list(["something"]),
+            SampleVariant.option_list([]),
+            SampleVariant.option_list(["something"]),
             False,
             id="equal variant, unequal value",
         ),
         pytest.param(
-            TestVariant.option_list([]),
-            TestVariant.option0(),
+            SampleVariant.option_list([]),
+            SampleVariant.option0(),
             False,
             id="left option_list right option0",
         ),
         pytest.param(
-            TestVariant.option0(),
-            TestVariant.option_list([]),
+            SampleVariant.option0(),
+            SampleVariant.option_list([]),
             False,
             id="right option_list left option0",
         ),
         pytest.param(
-            TestVariant.option_list([]), "a string", False, id="different type"
+            SampleVariant.option_list([]), "a string", False, id="different type"
         ),
     ],
 )
@@ -104,58 +104,58 @@ def test_is_eq(self, other, expected):
 
 def test_hash_identical_val_hashable():
     val = "something"
-    assert hash(TestVariant.option1(val)) == hash(TestVariant.option1(val))
+    assert hash(SampleVariant.option1(val)) == hash(SampleVariant.option1(val))
 
 
 def test_hash_different_equal_object_values():
-    assert hash(TestVariant.option1(("one",))) == hash(TestVariant.option1(("one",)))
+    assert hash(SampleVariant.option1(("one",))) == hash(SampleVariant.option1(("one",)))
 
 
 def test_hashed_same_variant_different_value():
-    assert hash(TestVariant.option1("one")) != hash(TestVariant.option1("two"))
+    assert hash(SampleVariant.option1("one")) != hash(SampleVariant.option1("two"))
 
 
 def test_hash_no_args_is_hashable():
-    assert hash(TestVariant.option0()) == hash(TestVariant.option0())
+    assert hash(SampleVariant.option0()) == hash(SampleVariant.option0())
 
 
 def test_hash_multi_args_is_hashable():
-    assert hash(TestVariant.option2("one", 2)) == hash(TestVariant.option2("one", 2))
+    assert hash(SampleVariant.option2("one", 2)) == hash(SampleVariant.option2("one", 2))
 
 
 def test_hash_unhashable_value_fails():
     with pytest.raises(TypeError) as ex:
-        hash(TestVariant.option1([]))
+        hash(SampleVariant.option1([]))
 
     assert "unhashable" in str(ex.value)
 
 
 def test_can_add_hashable_to_set():
-    assert {TestVariant.option1("one"), TestVariant.option1("one")} == {
-        TestVariant.option1("one")
+    assert {SampleVariant.option1("one"), SampleVariant.option1("one")} == {
+        SampleVariant.option1("one")
     }
-    assert {TestVariant.option0(), TestVariant.option0()} == {TestVariant.option0()}
+    assert {SampleVariant.option0(), SampleVariant.option0()} == {SampleVariant.option0()}
 
 
 @pytest.mark.parametrize(
     ["self", "cls", "expected"],
     [
         pytest.param(
-            TestVariant.option0(), TestVariant.option0, True, id="noargs is class"
+            SampleVariant.option0(), SampleVariant.option0, True, id="noargs is class"
         ),
         pytest.param(
-            TestVariant.option1("blah"),
-            TestVariant.option1,
+            SampleVariant.option1("blah"),
+            SampleVariant.option1,
             True,
             id="withargs is class",
         ),
         pytest.param(
-            TestVariant.option0(),
-            TestVariant.option1,
+            SampleVariant.option0(),
+            SampleVariant.option1,
             False,
             id="noargs is not with args",
         ),
-        pytest.param(TestVariant.option0(), TestVariant, True, id="noargs is class"),
+        pytest.param(SampleVariant.option0(), SampleVariant, True, id="noargs is class"),
     ],
 )
 def test_instance_check(self, cls, expected):
@@ -164,12 +164,12 @@ def test_instance_check(self, cls, expected):
 
 def test_exhaust():
     with pytest.raises(ValueError) as ex:
-        match TestVariant.option1("Value"):
-            case TestVariant.option0:
+        match SampleVariant.option1("Value"):
+            case SampleVariant.option0:
                 pytest.fail("Should not match nothing on a value")
             case _ as x:
-                TestVariant.exhaust(x)
+                SampleVariant.exhaust(x)
 
     ex_str = str(ex.value)
-    assert "TestVariant.option1" in ex_str
+    assert "SampleVariant.option1" in ex_str
     assert "Value" in ex_str

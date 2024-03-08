@@ -1,13 +1,12 @@
-# type: ignore
 from __future__ import annotations
 
-from typing import Callable, Generic, TypeVar, final
+from typing import Any, Callable, Generic, TypeVar, final
 
 from ._variant import Variant
 
 T = TypeVar("T")
 U = TypeVar("U")
-_RAISE = object()
+_RAISE: Any = object()
 
 
 @final
@@ -20,8 +19,8 @@ class Maybe(Generic[T], Variant):
     checks.
     """
 
-    just: (T,)
-    nothing: ()
+    just: (T,)  # type: ignore
+    nothing: ()  # type: ignore
 
     def apply(self, func: Callable[[T], U]) -> Maybe[U]:
         """Apply a function to the contained value.
@@ -32,7 +31,7 @@ class Maybe(Generic[T], Variant):
 
         Example:
 
-        >>> from basicenum.maybe import Maybe
+        >>> from match_variant.maybe import Maybe
         >>> Maybe.just("hello").apply(str.upper)
         <Maybe.just: 'HELLO'>
         >>>
@@ -40,6 +39,7 @@ class Maybe(Generic[T], Variant):
         <Maybe.nothing>
         >>>
         """
+
         match self:
             case Maybe.just(val):
                 return Maybe.just(func(val))
@@ -57,7 +57,7 @@ class Maybe(Generic[T], Variant):
 
         Example:
 
-        >>> from basicenum.maybe import Maybe
+        >>> from match_variant.maybe import Maybe
         >>> Maybe.just("hello").unwrap()
         'hello'
         >>> Maybe.nothing().unwrap(default="default")
@@ -65,17 +65,16 @@ class Maybe(Generic[T], Variant):
         >>> Maybe.nothing().unwrap()
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-          File "/Users/dustyphillips/Desktop/Code/basicenum/src/basicenum/maybe.py", line 62, in unwrap
+          File "/Users/dustyphillips/Desktop/Code/match_variant/src/match_variant/maybe.py", line 62, in unwrap
             raise TypeError(
         TypeError: Attempted to unwrap Maybe.nothing(); can only unwrap Maybe.just(val)
         >>>
         """
+
         match self:
             case Maybe.just(val):
                 return val
             case Maybe.nothing():
                 if default is _RAISE:
-                    raise TypeError(
-                        "Attempted to unwrap Maybe.nothing(); can only unwrap Maybe.just(val)"
-                    )
+                    raise TypeError("Attempted to unwrap Maybe.nothing(); can only unwrap Maybe.just(val)")
                 return default

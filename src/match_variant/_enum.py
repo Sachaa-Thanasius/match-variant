@@ -31,7 +31,7 @@ class Enum(Variant):
 
     @classmethod
     @lru_cache
-    def from_value(cls, value: Any) -> Maybe:
+    def from_value(cls, value: Any) -> Maybe[Any]:
         """
         Given a value, return the variant associated with
         that field.

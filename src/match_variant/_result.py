@@ -32,7 +32,7 @@ class Result(Generic[T, E], Variant):
 
         Example:
 
-        >>> from basicenum.result import Result
+        >>> from match_variant.result import Result
         >>> Result.ok("hello").apply(str.upper)
         <Result.ok: 'HELLO'>
         >>>
@@ -40,6 +40,7 @@ class Result(Generic[T, E], Variant):
         <Result.error: ValueError('oops')>
         >>>
         """
+
         match self:
             case Result.ok(val):
                 return Result.ok(func(val))
@@ -56,7 +57,7 @@ class Result(Generic[T, E], Variant):
 
         Example:
 
-        >>> from basicenum.result import Result
+        >>> from match_variant.result import Result
         >>> Result.ok("hello").unwrap()
         'hello'
         >>> Result.error(ValueError("oops")).unwrap()
@@ -66,6 +67,7 @@ class Result(Generic[T, E], Variant):
             raise ex
         ValueError: oops
         """
+
         match self:
             case Result.ok(val):
                 return val
@@ -74,6 +76,7 @@ class Result(Generic[T, E], Variant):
 
     def to_maybe(self) -> Maybe[T]:
         """Convert the result to an option, discarding the error if any"""
+
         match self:
             case Result.ok(value):
                 return Maybe.just(value)
@@ -89,15 +92,17 @@ class Trapped(Generic[T, E]):
 
     value: Union[Result[T, E], None] = None
 
-    def ok(self, value: T):
+    def ok(self, value: T) -> None:
         """Set the trapped result to an ok value."""
+
         self.value = Result.ok(value)
 
-    def error(self, value: E):
+    def error(self, value: E) -> None:
         """Set the trapped result to an error value.
 
         Typically called automaticaly by the `trap` contextmanager.
         """
+
         self.value = Result.error(value)
 
     @property
@@ -108,6 +113,7 @@ class Trapped(Generic[T, E]):
 
         If no ok was set inside the with statement, raises TypeError.
         """
+
         if self.value is None:
             return Result.error(TypeError("Trapped.ok was never called"))
 
@@ -115,7 +121,7 @@ class Trapped(Generic[T, E]):
 
 
 @contextmanager
-def trap(*exceptions):
+def trap(*exceptions: Exception):
     """
     Run a section of code and convert it to a Result type.
 
@@ -133,6 +139,7 @@ def trap(*exceptions):
         case _ as x:
             Result.exhaust(x)
     """
+
     if not (exceptions):
         exceptions = (Exception,)
 
